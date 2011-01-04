@@ -13,12 +13,12 @@ typedef enum sc_type {
 
 typedef struct sc_val {
   sc_type type;
+  void *value;
   struct sc_val *first;
   struct sc_val *rest;
 } sc_val;
 
 
-sc_val *sc_parse(char *str);
 
 sc_val *sc_val_new(sc_type type);
 void sc_init(void);

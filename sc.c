@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <readline/readline.h>
 #include "sc.h"
 #include "sc_parser.h"
-
-#define INPUT_LEN 512
 
 sc_val *sc_false;
 sc_val *sc_true;
@@ -46,13 +44,13 @@ void sc_print(sc_val *val, int is_rest)
 
 int main(void)
 {
-  char line[INPUT_LEN];
+  char *line;
   sc_init();
-  printf("> ");
-  while (fgets(line, INPUT_LEN, stdin) != NULL) {
+  while ((line = readline("> "))) {
+    add_history(line);
     sc_val *input = sc_parse(line);
     sc_print(input, 1);
-    printf("\n> ");
+    printf("\n");
   }
 
   return 0;

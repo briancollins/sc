@@ -6,12 +6,16 @@
 #include "sc_parser.h"
 
 sc_val *sc_false;
+sc_val *sc_quote;
 sc_val *sc_true;
 sc_val *sc_null;
 sc_ex sc_exception;
 
 void sc_print(sc_val *val, int is_rest)
 {
+  if (val->quoted)
+    printf("'");
+
   switch(val->type) {
     case SC_FALSE:
       printf("#f");
@@ -21,6 +25,9 @@ void sc_print(sc_val *val, int is_rest)
       break;
     case SC_NULL:
       printf("()");
+      break;
+    case SC_QUOTE:
+      printf("quote");
       break;
     case SC_SYMBOL:
       printf("%s", val->value);
@@ -89,6 +96,8 @@ int main(void)
           continue;
         } else if (sc_exception.ex == SC_TOO_MANY_CLOSING_PARENS_EX) {
           printf("too many closing parentheses\n");
+        } else if (sc_exception.ex == SC_UNEXPECTED_EX) {
+          printf("unexpected symbol\n");
         } else {
           printf("exception\n");
         }
@@ -107,6 +116,7 @@ sc_val *sc_val_new(sc_type type)
 {
   sc_val *v = malloc(sizeof(sc_val));
   v->type = type;
+  v->quoted = 0;
   if (type == SC_CELL) {
     v->first = sc_null;
     v->rest = sc_null;
@@ -117,6 +127,7 @@ sc_val *sc_val_new(sc_type type)
 
 void sc_init(void) 
 {
+  sc_quote = sc_val_new(SC_QUOTE);
   sc_false = sc_val_new(SC_FALSE);
   sc_true = sc_val_new(SC_TRUE);
   sc_null = sc_val_new(SC_NULL);

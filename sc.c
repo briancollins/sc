@@ -47,10 +47,12 @@ int main(void)
   char *line;
   sc_init();
   while ((line = readline("> "))) {
-    add_history(line);
-    sc_val *input = sc_parse(line);
-    sc_print(input, 1);
-    printf("\n");
+    if (*line) {
+      add_history(line);
+      sc_val *input = sc_parse(line);
+      sc_print(input, 1);
+      printf("\n");
+    }
   }
 
   return 0;
@@ -74,5 +76,3 @@ void sc_init(void)
   sc_true = sc_val_new(SC_TRUE);
   sc_null = sc_val_new(SC_NULL);
 }
-
-

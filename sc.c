@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <readline/readline.h>
 #include "sc.h"
@@ -52,18 +53,46 @@ void sc_raise(sc_exception_t ex, int param) {
 int main(void)
 {
   char *line;
+  char prompt_buf[512];
+  char in_buf[2048] = { '\0' };
+
+  char *prompt = "> ";
+
   sc_init();
-  while ((line = readline("> "))) {
+  while ((line = readline(prompt))) {
+    prompt = "> "; // reset prompt after indentation adjustments
+    
     if (*line) {
       if (setjmp(sc_exception.jmp)) {
-        printf("exception\n");
+        if (sc_exception.ex == SC_UNCLOSED_EX) {
+          strncat(in_buf, "\n", 2048);
+
+          int depth = sc_exception.param;
+          prompt_buf[0] = '\0';
+          for (int i = 0; i < depth; i++) {
+            strncat(prompt_buf, "\t", 512);
+          }
+          prompt = prompt_buf;
+        } else {
+          printf("exception\n");
+        }
       } else {
         add_history(line);
-        sc_val *input = sc_parse(line);
+        char *in = line;
+        if (in_buf[0]) {
+          in = in_buf;
+        }
+        strncat(in_buf, line, 2048);
+
+        sc_val *input = sc_parse(in);
+        in_buf[0] = '\0';
+
         sc_print(input, 1);
         printf("\n");
       }
     }
+
+    free(line);
   }
 
   return 0;

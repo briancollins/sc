@@ -22,13 +22,13 @@ sc_token_type sc_next_token(sc_stream *s, sc_token *t)
         sc_stream_next(s);
         if (in_symbol)
           done = 1;
-      break;
+        break;
       case '\0':
         if (in_symbol)
           done = 1;
         else
           return SC_TOK_END;
-      break;
+        break;
       case '(':
         if (in_symbol)
           done = 1;
@@ -36,7 +36,7 @@ sc_token_type sc_next_token(sc_stream *s, sc_token *t)
           sc_stream_next(s);
           return SC_TOK_OPEN;
         }
-      break;
+        break;
       case ')':
         if (in_symbol)
           done = 1;
@@ -44,7 +44,7 @@ sc_token_type sc_next_token(sc_stream *s, sc_token *t)
           sc_stream_next(s);
           return SC_TOK_CLOSE;
         }
-      break;
+        break;
       default:
         if (!in_symbol) {
           in_symbol = 1;
@@ -55,7 +55,7 @@ sc_token_type sc_next_token(sc_stream *s, sc_token *t)
         t->len ++;
         in_symbol = 1;
         sc_stream_next(s);
-      break;
+        break;
     }
   }
 
@@ -74,24 +74,24 @@ sc_val *sc_parse_stream(sc_stream *s)
     switch (tt) {
       case SC_TOK_END: done = 1; break;
       case SC_TOK_OPEN:
-        cur = sc_val_new(SC_CELL);
+                       cur = sc_val_new(SC_CELL);
 
-        cur->first = sc_parse_stream(s);
-        cur->rest = sc_parse_stream(s);
-        done = 1;
-      break;
+                       cur->first = sc_parse_stream(s);
+                       cur->rest = sc_parse_stream(s);
+                       done = 1;
+                       break;
       case SC_TOK_SYMBOL:
-        cur = sc_val_new(SC_CELL);
+                       cur = sc_val_new(SC_CELL);
 
-        cur->first = sc_val_new(SC_SYMBOL);
+                       cur->first = sc_val_new(SC_SYMBOL);
 
-        char *str = malloc(t.len + 1);
-        strncpy(str, t.str, t.len);
-        str[t.len] = '\0';
-        cur->first->value = str;
-        cur->rest = sc_parse_stream(s);
-        done = 1;
-      break;
+                       char *str = malloc(t.len + 1);
+                       strncpy(str, t.str, t.len);
+                       str[t.len] = '\0';
+                       cur->first->value = str;
+                       cur->rest = sc_parse_stream(s);
+                       done = 1;
+                       break;
       case SC_TOK_CLOSE: done = 1; break;
     }
   }

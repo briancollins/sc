@@ -13,16 +13,16 @@ void sc_print(sc_val *val, int is_rest)
   switch(val->type) {
     case SC_FALSE:
       printf("#f");
-    break;
+      break;
     case SC_TRUE:
       printf("#t");
-    break;
+      break;
     case SC_NULL:
       printf("()");
-    break;
+      break;
     case SC_SYMBOL:
       printf("%s", val->value);
-    break;
+      break;
     case SC_CELL:
       if (!is_rest)
         printf("(");
@@ -32,13 +32,13 @@ void sc_print(sc_val *val, int is_rest)
         printf(" ");
         sc_print(val->rest, 1);
       }
-      
+
       if (!is_rest)
         printf(")");
-    break;
+      break;
     default:
       printf("?");
-    break;
+      break;
   }
 }
 

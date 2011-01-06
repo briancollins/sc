@@ -63,7 +63,20 @@ int main(void)
     prompt = "> "; // reset prompt after indentation adjustments
     
     if (*line) {
-      if (setjmp(sc_exception.jmp)) {
+      if (!setjmp(sc_exception.jmp)) { // try
+        add_history(line);
+        char *in = line;
+        if (in_buf[0]) {
+          in = in_buf;
+        }
+        strncat(in_buf, line, 2048);
+
+        sc_val *input = sc_parse(in);
+
+        sc_print(input, 1);
+        printf("\n");
+
+      } else { // catch
         if (sc_exception.ex == SC_UNCLOSED_EX) {
           strncat(in_buf, "\n", 2048);
 
@@ -73,23 +86,15 @@ int main(void)
             strncat(prompt_buf, "\t", 512);
           }
           prompt = prompt_buf;
+          continue;
+        } else if (sc_exception.ex == SC_TOO_MANY_CLOSING_PARENS_EX) {
+          printf("too many closing parentheses\n");
         } else {
           printf("exception\n");
         }
-      } else {
-        add_history(line);
-        char *in = line;
-        if (in_buf[0]) {
-          in = in_buf;
-        }
-        strncat(in_buf, line, 2048);
-
-        sc_val *input = sc_parse(in);
-        in_buf[0] = '\0';
-
-        sc_print(input, 1);
-        printf("\n");
       }
+
+      in_buf[0] = '\0';
     }
 
     free(line);

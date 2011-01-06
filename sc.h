@@ -20,7 +20,8 @@ typedef struct sc_val {
 } sc_val;
 
 typedef enum sc_exception_t {
-  SC_UNCLOSED_EX
+  SC_UNCLOSED_EX,
+  SC_TOO_MANY_CLOSING_PARENS_EX
 } sc_exception_t;
 
 typedef struct sc_ex {

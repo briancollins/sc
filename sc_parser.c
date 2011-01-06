@@ -78,25 +78,30 @@ sc_val *sc_parse_stream(sc_stream *s, int depth)
         }
         done = 1; break;
       case SC_TOK_OPEN:
-                       cur = sc_val_new(SC_CELL);
+        cur = sc_val_new(SC_CELL);
 
-                       cur->first = sc_parse_stream(s, depth + 1);
-                       cur->rest = sc_parse_stream(s, depth);
-                       done = 1;
-                       break;
+        cur->first = sc_parse_stream(s, depth + 1);
+        cur->rest = sc_parse_stream(s, depth);
+        done = 1;
+        break;
       case SC_TOK_SYMBOL:
-                       cur = sc_val_new(SC_CELL);
+        cur = sc_val_new(SC_CELL);
 
-                       cur->first = sc_val_new(SC_SYMBOL);
+        cur->first = sc_val_new(SC_SYMBOL);
 
-                       char *str = malloc(t.len + 1);
-                       strncpy(str, t.str, t.len);
-                       str[t.len] = '\0';
-                       cur->first->value = str;
-                       cur->rest = sc_parse_stream(s, depth);
-                       done = 1;
-                       break;
-      case SC_TOK_CLOSE: done = 1; break;
+        char *str = malloc(t.len + 1);
+        strncpy(str, t.str, t.len);
+        str[t.len] = '\0';
+        cur->first->value = str;
+        cur->rest = sc_parse_stream(s, depth);
+        done = 1;
+        break;
+      case SC_TOK_CLOSE: 
+        if (depth == 0) {
+          sc_raise(SC_TOO_MANY_CLOSING_PARENS_EX, 0);
+        }
+
+        done = 1; break;
     }
   }
 

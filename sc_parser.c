@@ -1,9 +1,9 @@
-#include "sc.h"
-#include "sc_stream.h"
-#include "sc_parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sc.h"
+#include "sc_stream.h"
+#include "sc_parser.h"
 
 typedef struct sc_token {
   int len;
@@ -62,7 +62,7 @@ sc_token_type sc_next_token(sc_stream *s, sc_token *t)
   return SC_TOK_SYMBOL;
 }
 
-sc_val *sc_parse_stream(sc_stream *s)
+sc_val *sc_parse_stream(sc_stream *s, int depth)
 {
   int done = 0;
   sc_token t;
@@ -72,12 +72,16 @@ sc_val *sc_parse_stream(sc_stream *s)
     sc_token_type tt = sc_next_token(s, &t);
 
     switch (tt) {
-      case SC_TOK_END: done = 1; break;
+      case SC_TOK_END: 
+        if (depth != 0) {
+          sc_raise(SC_UNCLOSED_EX, depth);
+        }
+        done = 1; break;
       case SC_TOK_OPEN:
                        cur = sc_val_new(SC_CELL);
 
-                       cur->first = sc_parse_stream(s);
-                       cur->rest = sc_parse_stream(s);
+                       cur->first = sc_parse_stream(s, depth + 1);
+                       cur->rest = sc_parse_stream(s, depth);
                        done = 1;
                        break;
       case SC_TOK_SYMBOL:
@@ -89,7 +93,7 @@ sc_val *sc_parse_stream(sc_stream *s)
                        strncpy(str, t.str, t.len);
                        str[t.len] = '\0';
                        cur->first->value = str;
-                       cur->rest = sc_parse_stream(s);
+                       cur->rest = sc_parse_stream(s, depth);
                        done = 1;
                        break;
       case SC_TOK_CLOSE: done = 1; break;
@@ -103,6 +107,6 @@ sc_val *sc_parse(char *str)
 {
   sc_stream s;
   sc_stream_init(&s, str);
-  sc_val *v = sc_parse_stream(&s);
+  sc_val *v = sc_parse_stream(&s, 0);
   return v;
 }

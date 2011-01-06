@@ -7,6 +7,7 @@
 sc_val *sc_false;
 sc_val *sc_true;
 sc_val *sc_null;
+sc_ex sc_exception;
 
 void sc_print(sc_val *val, int is_rest)
 {
@@ -42,16 +43,26 @@ void sc_print(sc_val *val, int is_rest)
   }
 }
 
+void sc_raise(sc_exception_t ex, int param) {
+  sc_exception.param = param;
+  sc_exception.ex = ex;
+  longjmp(sc_exception.jmp, 1);
+}
+
 int main(void)
 {
   char *line;
   sc_init();
   while ((line = readline("> "))) {
     if (*line) {
-      add_history(line);
-      sc_val *input = sc_parse(line);
-      sc_print(input, 1);
-      printf("\n");
+      if (setjmp(sc_exception.jmp)) {
+        printf("exception\n");
+      } else {
+        add_history(line);
+        sc_val *input = sc_parse(line);
+        sc_print(input, 1);
+        printf("\n");
+      }
     }
   }
 
@@ -76,3 +87,4 @@ void sc_init(void)
   sc_true = sc_val_new(SC_TRUE);
   sc_null = sc_val_new(SC_NULL);
 }
+
